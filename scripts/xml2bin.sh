@@ -8,8 +8,7 @@ OPENSSL=/usr/local/bin/openssl
 
 [ ! -f $IN ] && echo File $IN does not exist && exit
 
-# MD5 used for Archer C2300
-OUR_MD5=`echo -n "Archer C2300" | md5sum | cut -d' ' -f 1`
+OUR_MD5=`echo -n "ArcherC5400" | md5sum | cut -d' ' -f 1`
 
 # AES key & iv params
 AES="-K 2EB38F7EC41D4B8E1422805BCD5F740BC3B95BE163E39D67579EB344427F7836 -iv 360028C9064242F81074F4C127D299F6"
@@ -18,7 +17,13 @@ TMP=$IN-tmp-dir
 mkdir -p $TMP
 
 # encrypt xml to get orig.bin file
-cat $IN | $OPENSSL zlib | $OPENSSL aes-256-cbc $AES -out $TMP/orig.bin
+cat $IN | $OPENSSL zlib | $OPENSSL aes-256-cbc $AES -out $TMP/ori-backup-user-config.bin
+
+# make tar file with this and dummy cert
+touch $TMP/ori-backup-certificate.bin
+cd $TMP
+tar --owner=0 --group=0 -cvf orig.bin .
+cd ..
 
 # create binary file (16 bytes) with content of product name md5
 echo $OUR_MD5 | xxd -r -p >$TMP/md5file
